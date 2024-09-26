@@ -1,7 +1,22 @@
 import cv2
 import numpy as np
 import time
+import time
+# ฟังก์ชันนับถอยหลัง 2 วินาทีแล้วกลับไปหน้าเลือกตัวละคร
 
+def countdown_to_main_menu(frame, countdown_seconds=2):
+    for i in range(countdown_seconds, 0, -1):
+        frame_copy = frame.copy()  # สร้างสำเนาของเฟรม
+        display_text(frame_copy, f"Returning to main menu in {i} seconds...", (250, 500), 2, (255, 255, 255), 3)
+        cv2.imshow(window_name, frame_copy)
+        cv2.waitKey(1000)  # รอ 1 วินาทีต่อแต่ละการนับถอยหลัง
+# ฟังก์ชันนับถอยหลัง 2 วินาทีแล้วกลับไปหน้าเลือกตัวละคร
+def countdown_to_main_menu(frame, countdown_seconds=2):
+    for i in range(countdown_seconds, 0, -1):
+        frame_copy = frame.copy()  # สร้างสำเนาของเฟรม
+        display_text(frame_copy, f"Returning to main menu in {i} seconds...", (250, 500), 2, (255, 255, 255), 3)
+        cv2.imshow(window_name, frame_copy)
+        cv2.waitKey(1000)  # รอ 1 วินาทีต่อแต่ละการนับถอยหลัง
 # Initial settings
 window_name = "Redlight Greenlight Game"
 width, height = 1280, 720
@@ -15,7 +30,9 @@ player_button_images = ['Resources/Menu/player1.png', 'Resources/Menu/player2.pn
 character1 = cv2.imread('Resources/Menu/1Char.png', cv2.IMREAD_UNCHANGED)
 character2 = cv2.imread('Resources/Menu/Kai_Onstove.png', cv2.IMREAD_UNCHANGED)
 character3 = cv2.imread('Resources/Menu/Bada_Onstove.png', cv2.IMREAD_UNCHANGED)
-
+# เพิ่มการโหลดภาพ All kokowa.jpg
+background_selection_screen = cv2.imread('Resources/Menu/All kokowa.jpg')
+background_selection_screen = cv2.resize(background_selection_screen, (width, height))  # ปรับขนาดภาพพื้นหลัง
 
 # ตั้งค่าเริ่มต้น
 character = None
@@ -29,6 +46,12 @@ timer_started = False
 start_time = None
 game_started = False  # Track if the game has started
 character_selected = False  # เช็คว่าผู้เล่นได้เลือกตัวละครหรือยัง
+# Load status bar image
+status_bar = cv2.imread('Resources/Menu/statusbar.jpeg')
+status_bar_resized = cv2.resize(status_bar, (474, 29))  # ปรับขนาดเป็น 474x29
+
+# Coin system
+coins = 0  # Initialize total coins
 
 # Initialize webcam
 cap = cv2.VideoCapture(0)  # ใช้กล้องที่ 0
@@ -66,9 +89,10 @@ while True:
 
     frame = bg_image.copy()
 
-    # ถ้ายังไม่เลือกตัวละคร แสดงปุ่มเลือกตัวละคร
+    # ถ้ายังไม่เลือกตัวละคร แสดงปุ่มเลือกตัวละคร และแสดง total coins
     if not character_selected:
-        display_text(frame, "Press 1, 2, or 3 to choose a character", (300, 360), 2, (255, 255, 255), 3)
+        frame = background_selection_screen.copy()  # เปลี่ยนพื้นหลังเป็น All kokowa.jpg
+        display_text(frame, f"Total Coins: {coins}", (50, 50), 1, (255, 255, 255), 2)  # แสดง coins ที่มุมบนซ้าย
         cv2.imshow(window_name, frame)
 
         key = cv2.waitKey(30) & 0xFF
@@ -107,9 +131,22 @@ while True:
 
     if game_over:
         if win:
-            display_text(frame, "You win! Press 'R' to restart", (400, 360), 2, (0, 255, 0), 3)
+            coins += 10  # ผู้เล่นชนะจะได้รับ 10 coins
+            display_text(frame, "You win! Returning to main menu...", (200, 360), 2, (0, 255, 0), 3)
+            countdown_to_main_menu(frame)  # เรียกฟังก์ชันนับถอยหลัง
+            # Reset everything after winning
+            character_selected = False
+            game_started = False
+            timer_started = False
+            win = False  # Reset win state
+            game_over = False  # Reset game over state
+            character_size = 0.1  # Reset character size to the initial size
+            start_time = None  # Reset the start time for the new game
+
         else:
-            display_text(frame, "Game Over! Press 'R' to restart", (400, 360), 2, (0, 0, 255), 3)
+            display_text(frame, "Game Over! Press 'R' to restart", (200, 360), 2, (0, 0, 255), 3)
+
+
     else:
         # Redlight/Greenlight logic
         if elapsed_time % 10 < 5:
@@ -126,7 +163,7 @@ while True:
             if game_state == "Redlight":
                 game_over = True
             else:
-                character_size = min(character_size + 0.005, max_size)
+                character_size = min(character_size + 0.02, max_size)
 
     # อัพเดทเฟรมก่อนหน้า
     prev_frame = current_frame.copy()
@@ -139,6 +176,7 @@ while True:
     if character_resized.shape[0] >= 600:
         win = True
         game_over = True
+        character_size = 0.1
 
     char_x = max((width - character_resized.shape[1]) // 2, 0)
     char_y = max((height - character_resized.shape[0]) // 2, 0)
@@ -158,11 +196,6 @@ while True:
     else:
         frame[char_y:char_y_end, char_x:char_x_end] = character_resized[0:char_y_end - char_y, 0:char_x_end - char_x]
 
-    try:
-        frame[char_y:char_y_end, char_x:char_x_end] = character_resized[0:char_y_end - char_y, 0:char_x_end - char_x]
-    except ValueError as e:
-        print(f"Error placing character: {e}")
-
     camera_display = cv2.resize(current_frame, (320, 180))
     frame[height - 180:height, width - 320:width] = camera_display
 
@@ -176,8 +209,7 @@ while True:
         win = False
         character_size = 0.1
         start_time = time.time()
-        game_started = False  # Reset game_started state to ask player if they are ready
-        character_selected = False  # Reset character selection
+        game_started = False  # Reset game_started state
 
 cap.release()
 cv2.destroyAllWindows()
