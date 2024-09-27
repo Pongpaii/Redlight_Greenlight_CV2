@@ -1,7 +1,6 @@
 import cv2
 import numpy as np
 import time
-import time
 # ฟังก์ชันนับถอยหลัง 2 วินาทีแล้วกลับไปหน้าเลือกตัวละคร
 
 def countdown_to_main_menu(frame, countdown_seconds=2):
@@ -31,7 +30,7 @@ character1 = cv2.imread('Resources/Menu/1Char.png', cv2.IMREAD_UNCHANGED)
 character2 = cv2.imread('Resources/Menu/Kai_Onstove.png', cv2.IMREAD_UNCHANGED)
 character3 = cv2.imread('Resources/Menu/Bada_Onstove.png', cv2.IMREAD_UNCHANGED)
 # เพิ่มการโหลดภาพ All kokowa.jpg
-background_selection_screen = cv2.imread('Resources/Menu/All kokowa.jpg')
+background_selection_screen = cv2.imread('Resources/Menu/Choose.jpg')
 background_selection_screen = cv2.resize(background_selection_screen, (width, height))  # ปรับขนาดภาพพื้นหลัง
 
 # ตั้งค่าเริ่มต้น
