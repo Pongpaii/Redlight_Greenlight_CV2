@@ -1,0 +1,1 @@
+#add bg snow, gb night, add sound, add character #fix gogowa

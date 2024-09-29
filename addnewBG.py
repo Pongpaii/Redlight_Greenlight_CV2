@@ -42,8 +42,8 @@ player_button_images = ['Resources/Menu/player1.png', 'Resources/Menu/player2.pn
 back_image = cv2.imread('Resources/Menu/Back.PNG', cv2.IMREAD_UNCHANGED)
 front_red_image = cv2.imread('Resources/Menu/Front_red.PNG', cv2.IMREAD_UNCHANGED)
 # Resize back and front images (optional, adjust as needed)
-back_image = cv2.resize(back_image, (100, 300))  # Resize to fit on the left
-front_red_image = cv2.resize(front_red_image, (100, 300))  # Resize to fit on the left
+back_image = cv2.resize(back_image, (100, 400))  # Resize to fit on the left
+front_red_image = cv2.resize(front_red_image, (100, 400))  # Resize to fit on the left
 
 # Characters
 character1 = cv2.imread('Resources/Menu/1Char.png', cv2.IMREAD_UNCHANGED)
@@ -139,7 +139,7 @@ while True:
 
         display_text(frame, "Shop", (width // 2 - 100, 100), 2, (255, 215, 0), 3)
 
-        display_text(frame, "Press 'S' to buy Speed Boost (10 coins)", (200, 300), 1, (255, 255, 255), 2)
+        display_text(frame, "Press 'S' to buy Speed Boost (20 coins)", (200, 300), 1, (255, 255, 255), 2)
 
         display_text(frame, "Press 'T' to Skip Shop", (200, 400), 1, (255, 255, 255), 2)
 
