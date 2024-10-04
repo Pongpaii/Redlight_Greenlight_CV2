@@ -1,12 +1,21 @@
 import cv2
 import numpy as np
 import time
-import random  # นำเข้าโมsssดูลสำหรับการสุ่ม
+import random  # นำเข้าโมดูลสำหรับการสุ่ม
 import pygame
+# Initialize variables
+current_game_state = "Greenlight"  # เพิ่มบรรทัดนี้เพื่อประกาศตัวแปร
+character = None
+character_size = 0.1  # Initial size of the character (very small)
+
+# กำหนดเวลาสุ่มเริ่มต้น
+greenlight_duration = random.randint(1, 4)  # 3 ถึง 6 วินาที
+redlight_duration = random.randint(2, 4)  # 2 ถึง 4 วินาที
+next_state_change = time.time() + greenlight_duration  # ตั้งเวลาเปลี่ยนสถานะเริ่มต้น
 
 
 def draw_progress_bar(frame, current_size, min_size, max_size, bar_width=468, bar_height=20, position=(400, 680),
-                      bar_color=(6,96,228), bg_color=(184, 194, 210)):
+                      bar_color=(6, 96, 228), bg_color=(184, 194, 210)):
     # คำนวณเปอร์เซ็นต์ความคืบหน้าจากขนาดปัจจุบัน
     progress = (current_size - min_size) / (max_size - min_size)
     progress = max(0, min(progress, 1))  # จำกัดค่าอยู่ในช่วง 0 ถึง 1
@@ -28,13 +37,11 @@ you_win_sound = pygame.mixer.Sound('Resources/Sounds/win2.wav')
 win_sound_played = False
 lose_sound_played = False
 
-# สร้างตัวแปรสุ่มเวลาสำหรับเปลี่ยนสถานะครั้งแรก
-next_state_change = time.time() + random.randint(3, 7)
-current_game_state = "Greenlight"
-# Function to display text on the frame
 
+# Function to display text on the frame
 def display_text(frame, text, position, font_scale=1, color=(255, 255, 255), thickness=2):
     cv2.putText(frame, text, position, cv2.FONT_HERSHEY_SIMPLEX, font_scale, color, thickness)
+
 
 # Function for countdown to main menu
 def countdown_to_main_menu(frame, countdown_seconds=2):
@@ -44,6 +51,7 @@ def countdown_to_main_menu(frame, countdown_seconds=2):
         cv2.imshow(window_name, frame_copy)
         cv2.waitKey(1000)  # Wait 1 second for each countdown
 
+
 # Function to check movement between frames
 def check_movement(prev_frame, current_frame, threshold=25):
     prev_gray = cv2.cvtColor(prev_frame, cv2.COLOR_BGR2GRAY)
@@ -52,6 +60,7 @@ def check_movement(prev_frame, current_frame, threshold=25):
     _, thresh = cv2.threshold(diff, threshold, 255, cv2.THRESH_BINARY)
     movement = np.sum(thresh) / 255
     return movement > 5000  # Threshold for movement detection
+
 
 # Initial settings
 window_name = "Redlight Greenlight Game"
@@ -87,7 +96,6 @@ status_bar_resized = cv2.resize(status_bar, (474, 29))  # Resize status bar
 ptoplay_image = cv2.imread('Resources/Menu/Ptoplay.png')
 ptoplay_image = cv2.resize(ptoplay_image, (width, height))  # Resize to 1280x720
 
-
 # Initialize variables
 character = None
 character_size = 0.1  # Initial size of the character (very small)
@@ -107,7 +115,7 @@ coins = 10  # Initialize total coins (set to 10 for testing)
 # Speed boost variables
 speed_boost_active = False
 speed_boost_end_time = None
-speed_boost_cost = 20  # Set cost of speed boost to 10 coins
+speed_boost_cost = 20  # Set cost of speed boost to 20 coins
 speed_boost_used = False  # Flag to check if speed boost has been used
 
 # Initialize webcam
@@ -153,15 +161,11 @@ while True:
             game_state = "Shop"
         continue
 
-
     # Shop state
-
     elif game_state == "Shop":
-
         # Display Shop screen
-
         frame = background_shop.copy()  # Use the shop background image
-        display_text(frame, f"  : {coins}", (50, 50), 1, (255, 255, 255), 2)  # Display coins
+        display_text(frame, f"Coins: {coins}", (50, 50), 1, (255, 255, 255), 2)  # Display coins
 
         cv2.imshow(window_name, frame)
 
@@ -189,8 +193,10 @@ while True:
         elif key == ord('p') or key == ord('P'):
             game_state = "Play"  # Proceed to Play without buying
         continue
+
     elif game_state == "Play":
         draw_progress_bar(frame, character_size, 0.1, max_size)
+
         # If the game hasn't started yet, display the prompt to start
         if not game_started:
             frame = ptoplay_image.copy()  # ใช้ภาพ Ptoplay เป็นพื้นหลัง
@@ -199,9 +205,6 @@ while True:
             key = cv2.waitKey(30) & 0xFF
             if key == ord('p') or key == ord('P'):  # Press 'P' to start the game
                 game_started = True
-
-
-
                 start_time = time.time()  # Start the timer
             continue
 
@@ -223,7 +226,6 @@ while True:
                 speed_boost_active = False  # Deactivate speed boost
 
         # Display countdown timer
-
         display_text(frame, f"Time: {remaining_time // 60}:{remaining_time % 60:02}", (1000, 50), 1, (255, 255, 255), 2)
 
         if game_over:
@@ -254,7 +256,7 @@ while True:
 
         else:
             # Redlight/Greenlight logic
-            if elapsed_time % 10 < 5:
+            if elapsed_time % (greenlight_duration + redlight_duration) < greenlight_duration:
                 if current_game_state != "Greenlight":
                     pygame.mixer.Sound.play(green_light_sound)  # เล่นเสียง Greenlight
                 current_game_state = "Greenlight"
@@ -281,6 +283,7 @@ while True:
                     )
             else:
                 frame[y_position:y_position + img_height, x_position:x_position + img_width] = side_image
+
             # Detect movement
             movement_detected = check_movement(prev_frame, current_frame)
             if movement_detected:
@@ -288,7 +291,7 @@ while True:
                     game_over = True
                 else:
                     # Increase character size faster if speed boost is active
-                    growth_rate = 0.0001 if speed_boost_active else 0.005  # ลดการขยายให้ช้าลง
+                    growth_rate = 0.0005 if speed_boost_active else 0.005  # ลดการขยายให้ช้าลง
                     character_size = min(character_size + growth_rate, max_size)
 
             # Update previous frame
@@ -319,8 +322,8 @@ while True:
 
                 for c in range(3):  # For each color channel
                     frame[char_y:char_y_end, char_x:char_x_end, c] = (
-                        alpha * character_resized[:, :, c] +
-                        (1 - alpha) * frame[char_y:char_y_end, char_x:char_x_end, c]
+                            alpha * character_resized[:, :, c] +
+                            (1 - alpha) * frame[char_y:char_y_end, char_x:char_x_end, c]
                     )
             else:
                 frame[char_y:char_y_end, char_x:char_x_end] = character_resized
@@ -344,8 +347,6 @@ while True:
             game_state = "Selection"  # Return to Selection state
             win_sound_played = False  # Reset win sound flag
             lose_sound_played = False  # Reset lose sound flag
-
-    # Handle other states if any
 
 cap.release()
 cv2.destroyAllWindows()

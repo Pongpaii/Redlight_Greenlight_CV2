@@ -200,8 +200,6 @@ while True:
             if key == ord('p') or key == ord('P'):  # Press 'P' to start the game
                 game_started = True
 
-
-
                 start_time = time.time()  # Start the timer
             continue
 
@@ -288,7 +286,7 @@ while True:
                     game_over = True
                 else:
                     # Increase character size faster if speed boost is active
-                    growth_rate = 0.0001 if speed_boost_active else 0.005  # ลดการขยายให้ช้าลง
+                    growth_rate = 0.0005 if speed_boost_active else 0.005  # ลดการขยายให้ช้าลง
                     character_size = min(character_size + growth_rate, max_size)
 
             # Update previous frame

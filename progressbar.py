@@ -22,9 +22,11 @@ def draw_progress_bar(frame, current_size, min_size, max_size, bar_width=468, ba
 pygame.mixer.init()
 red_light_sound = pygame.mixer.Sound('Resources/Sounds/redLight.mp3')
 green_light_sound = pygame.mixer.Sound('Resources/Sounds/greenLight.mp3')
-you_lose_sound = pygame.mixer.Sound('Resources/Sounds/gameover.mp3')
-you_win_sound = pygame.mixer.Sound('Resources/Sounds/win.mp3')
-
+you_lose_sound = pygame.mixer.Sound('Resources/Sounds/gameover2.wav')
+you_win_sound = pygame.mixer.Sound('Resources/Sounds/win2.wav')
+# Initialize flags to track if sounds have been played
+win_sound_played = False
+lose_sound_played = False
 
 # สร้างตัวแปรสุ่มเวลาสำหรับเปลี่ยนสถานะครั้งแรก
 next_state_change = time.time() + random.randint(3, 7)
