@@ -217,6 +217,10 @@ while True:
 
             key = cv2.waitKey(30) & 0xFF
             if key == ord('p') or key == ord('P'):  # Press 'P' to start the game
+                if bg_image is None or np.array_equal(bg_image, cv2.imread('Resources/Menu/BG_Snow.jpg')):
+                    bg_image = cv2.imread('Resources/Menu/BG_Play1.jpg')
+                else:
+                    bg_image = cv2.imread('Resources/Menu/BG_Snow.jpg')
                 game_started = True
                 start_time = time.time()  # Start the timer
             continue
